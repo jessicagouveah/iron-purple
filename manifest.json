@@ -1,0 +1,18 @@
+{
+  "name": "Iron Purple",
+  "short_name": "Iron Purple",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#6d28d9",
+  "description": "Aplicativo pessoal de treino com cargas, checks, cronômetros, histórico e treinos mensais.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

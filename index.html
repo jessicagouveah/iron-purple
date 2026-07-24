@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#6d28d9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Iron Purple" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Iron Purple</title>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Seu treino, do seu jeito</p>
+        <h1>Iron Purple</h1>
+      </div>
+      <button id="installBtn" class="ghost hidden">Instalar</button>
+    </header>
+
+    <main>
+      <section class="hero card">
+        <div>
+          <span class="pill" id="monthBadge">Mês atual</span>
+          <h2 id="todayTitle">Treino do dia</h2>
+          <p id="todaySubtitle">Acompanhe cargas, séries e tempo.</p>
+        </div>
+        <div class="progress-ring">
+          <span id="progressValue">0%</span>
+        </div>
+      </section>
+
+      <section class="card workout-actions">
+        <div>
+          <p class="eyebrow">Cronômetro do treino</p>
+          <h3 id="workoutTimer">00:00:00</h3>
+        </div>
+        <div class="button-row">
+          <button id="startWorkoutBtn" class="primary">Iniciar treino</button>
+          <button id="pauseWorkoutBtn" class="secondary">Pausar</button>
+          <button id="finishWorkoutBtn" class="ghost">Finalizar</button>
+        </div>
+      </section>
+
+      <section class="card selector-card">
+        <label>
+          Mês
+          <select id="monthSelect"></select>
+        </label>
+        <label>
+          Dia
+          <select id="daySelect"></select>
+        </label>
+        <div class="button-row wrap">
+          <button id="newMonthBtn" class="secondary">Novo mês</button>
+          <button id="duplicateMonthBtn" class="secondary">Duplicar mês</button>
+          <button id="renameWorkoutBtn" class="ghost">Renomear treino</button>
+        </div>
+      </section>
+
+      <section id="workoutList" class="stack"></section>
+
+      <section class="card timer-card">
+        <div>
+          <p class="eyebrow">Descanso entre séries</p>
+          <h3 id="restTimer">01:00</h3>
+        </div>
+        <div class="timer-actions">
+          <button class="secondary" data-time="30">30s</button>
+          <button class="secondary active-rest" data-time="60">60s</button>
+          <button class="secondary" data-time="90">90s</button>
+          <button class="secondary" data-time="120">120s</button>
+          <button id="startRestBtn" class="primary">Iniciar</button>
+        </div>
+      </section>
+
+      <section class="card profile-card">
+        <div>
+          <p class="eyebrow">Perfil</p>
+          <h3>Jéssica</h3>
+          <p>1,63 m · 62 kg · treino diário</p>
+        </div>
+        <div class="button-row wrap">
+          <button id="historyBtn" class="secondary">Histórico</button>
+          <button id="resetDayBtn" class="ghost danger">Limpar dia</button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-view="today">Hoje</button>
+      <button class="nav-item" id="addExerciseBtn">Adicionar</button>
+      <button class="nav-item" id="progressBtn">Progresso</button>
+    </nav>
+  </div>
+
+  <dialog id="exerciseDialog">
+    <form method="dialog" class="dialog-card">
+      <h3 id="exerciseDialogTitle">Novo exercício</h3>
+      <input type="hidden" id="editingExerciseId" />
+      <label>Nome
+        <input id="exerciseName" placeholder="Ex.: Agachamento livre" />
+      </label>
+      <div class="grid-2">
+        <label>Séries
+          <input id="exerciseSets" type="number" value="4" min="1" max="12" />
+        </label>
+        <label>Repetições padrão
+          <input id="exerciseReps" type="number" value="12" min="1" max="100" />
+        </label>
+      </div>
+      <div class="grid-2">
+        <label>Carga inicial (kg)
+          <input id="exerciseWeight" type="number" value="0" min="0" step="0.5" />
+        </label>
+        <label>Descanso (seg)
+          <input id="exerciseRest" type="number" value="60" min="10" max="600" />
+        </label>
+      </div>
+      <label>Observações
+        <textarea id="exerciseNotes" placeholder="Ex.: manter joelhos alinhados"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Cancelar</button>
+        <button type="button" id="saveExerciseBtn" class="primary">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="progressDialog">
+    <form method="dialog" class="dialog-card">
+      <h3>Resumo do treino atual</h3>
+      <div id="progressSummary" class="summary-box"></div>
+      <button class="primary full">Fechar</button>
+    </form>
+  </dialog>
+
+  <dialog id="historyDialog">
+    <form method="dialog" class="dialog-card wide">
+      <h3>Histórico de treinos</h3>
+      <div id="historyList" class="history-list"></div>
+      <button class="primary full">Fechar</button>
+    </form>
+  </dialog>
+
+  <dialog id="finishDialog">
+    <form method="dialog" class="dialog-card">
+      <h3>Finalizar treino</h3>
+      <label>Como foi?
+        <select id="difficultySelect">
+          <option>Muito fácil</option>
+          <option>Fácil</option>
+          <option selected>Moderado</option>
+          <option>Difícil</option>
+          <option>Muito difícil</option>
+        </select>
+      </label>
+      <label>Observações
+        <textarea id="workoutNotes" placeholder="Ex.: boa execução, aumentar carga na próxima semana"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Cancelar</button>
+        <button type="button" id="confirmFinishBtn" class="primary">Salvar treino</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="simplePromptDialog">
+    <form method="dialog" class="dialog-card">
+      <h3 id="simplePromptTitle">Informação</h3>
+      <label id="simplePromptLabel">Nome
+        <input id="simplePromptInput" />
+      </label>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Cancelar</button>
+        <button type="button" id="simplePromptSaveBtn" class="primary">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
