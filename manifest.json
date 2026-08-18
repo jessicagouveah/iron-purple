@@ -1,15 +1,32 @@
 {
-  "name": "Iron Purple",
-  "short_name": "Iron Purple",
+  "id": "./",
+  "name": "IRON Purple — Treino e Evolução",
+  "short_name": "IRON Purple",
+  "description": "Plano completo de treinos, calendário anual, evolução de cargas, hidratação e histórico.",
+  "lang": "pt-BR",
+  "dir": "ltr",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b1020",
-  "theme_color": "#6d28d9",
-  "description": "Aplicativo pessoal de treino com cargas, checks, cronômetros, histórico e treinos mensais.",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0815",
+  "theme_color": "#11091d",
+  "categories": ["fitness", "health", "lifestyle"],
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
