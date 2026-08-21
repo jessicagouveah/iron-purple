@@ -1,7 +1,7 @@
 "use strict";
 
-const CACHE_NAME = "iron-purple-v10-coach-fix";
-const APP_VERSION = "2026-08-21-coach-2";
+const CACHE_NAME = "iron-purple-v11-coach-readable";
+const APP_VERSION = "2026-08-21-coach-3";
 const APP_ASSETS = ["./", "./index.html", "./professor/index.html", `./style.css?v=${APP_VERSION}`, `./app.js?v=${APP_VERSION}`, "./manifest.json", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 const EXERCISE_IMAGE_SOURCES = [
   { origin: "https://cdn.jsdelivr.net", path: "/gh/yuhonas/free-exercise-db@main/exercises/" },
