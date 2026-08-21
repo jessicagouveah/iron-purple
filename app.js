@@ -5,6 +5,61 @@ const SCHEMA_VERSION = 4;
 const WEEKDAYS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 const SHORT_DAYS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
 const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+const APP_VERSION = "2026-08-21-usabilidade-1";
+const EXERCISE_IMAGE_BASE = "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises";
+const EXERCISE_IMAGE_FALLBACK = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
+const EXERCISE_MOTION_IDS = Object.freeze({
+  "Agachamento livre ou no smith": "Barbell_Squat",
+  "Leg press 45°": "Leg_Press",
+  "Afundo búlgaro": "Split_Squats",
+  "Cadeira extensora": "Leg_Extensions",
+  "Elevação pélvica com barra": "Barbell_Hip_Thrust",
+  "Cadeira abdutora": "Thigh_Abductor",
+  "Panturrilha em pé": "Standing_Calf_Raises",
+  "Puxada frontal na polia": "Wide-Grip_Lat_Pulldown",
+  "Remada baixa com triângulo": "Seated_Cable_Rows",
+  "Remada unilateral com halter": "One-Arm_Dumbbell_Row",
+  "Face pull na corda": "Face_Pull",
+  "Rosca direta na barra": "Barbell_Curl",
+  "Rosca martelo com halteres": "Hammer_Curls",
+  "Prancha abdominal": "Plank",
+  "Abdominal na polia alta": "Cable_Crunch",
+  "Stiff com barra ou halteres": "Romanian_Deadlift",
+  "Mesa flexora": "Lying_Leg_Curls",
+  "Cadeira flexora": "Seated_Leg_Curl",
+  "Coice na polia": "Glute_Kickback",
+  "Passada reversa com halteres": "Dumbbell_Rear_Lunge",
+  "Panturrilha sentada": "Seated_Calf_Raise",
+  "Supino com halteres": "Dumbbell_Bench_Press",
+  "Desenvolvimento com halteres": "Dumbbell_Shoulder_Press",
+  "Elevação lateral": "Side_Lateral_Raise",
+  "Crucifixo na máquina": "Butterfly",
+  "Tríceps na corda": "Triceps_Pushdown_-_Rope_Attachment",
+  "Tríceps francês unilateral": "Standing_Dumbbell_Triceps_Extension",
+  "Elevação de pernas": "Hanging_Leg_Raise",
+  "Prancha lateral": "Side_Bridge",
+  "Agachamento sumô": "Plie_Dumbbell_Squat",
+  "Elevação pélvica no smith": "Smith_Machine_Hip_Raise",
+  "Leg press pés altos": "Leg_Press",
+  "Passada andando": "Bodyweight_Walking_Lunge",
+  "Stiff unilateral": "Kettlebell_One-Legged_Deadlift",
+  "Cadeira abdutora inclinada": "Thigh_Abductor",
+  "Panturrilha no leg press": "Calf_Press_On_The_Leg_Press_Machine",
+  "Caminhada leve": "Walking_Treadmill",
+  "Mobilidade de quadril": "Kneeling_Hip_Flexor",
+  "Alongamento leve": "All_Fours_Quad_Stretch"
+});
+const MOTION_FALLBACKS = [
+  ["abdutora", "Thigh_Abductor"], ["adutora", "Thigh_Adductor"], ["extensora", "Leg_Extensions"], ["leg press", "Leg_Press"],
+  ["agachamento", "Barbell_Squat"], ["pelvica", "Barbell_Hip_Thrust"], ["hip thrust", "Barbell_Hip_Thrust"],
+  ["panturrilha", "Standing_Calf_Raises"], ["flexora", "Seated_Leg_Curl"], ["stiff", "Romanian_Deadlift"],
+  ["gluteo", "Glute_Kickback"], ["passada", "Bodyweight_Walking_Lunge"], ["afundo", "Split_Squats"],
+  ["puxada", "Wide-Grip_Lat_Pulldown"], ["remada", "Seated_Cable_Rows"], ["face pull", "Face_Pull"],
+  ["rosca", "Barbell_Curl"], ["prancha", "Plank"], ["abdominal", "Cable_Crunch"],
+  ["supino", "Dumbbell_Bench_Press"], ["desenvolvimento", "Dumbbell_Shoulder_Press"],
+  ["elevacao lateral", "Side_Lateral_Raise"], ["crucifixo", "Butterfly"], ["triceps", "Triceps_Pushdown_-_Rope_Attachment"],
+  ["caminhada", "Walking_Treadmill"], ["mobilidade", "Kneeling_Hip_Flexor"], ["alongamento", "All_Fours_Quad_Stretch"]
+];
 
 const TRAINING_PROGRAM = {
   Segunda: {
@@ -216,6 +271,7 @@ let restInterval = null;
 let workoutInterval = null;
 let toastTimeout = null;
 let deferredPrompt = null;
+const expandedCompletedExercises = new Set();
 
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -343,11 +399,70 @@ function setCalendarMonth(month, year) {
   setSelectedDate(dateKey(new Date(year, month, day, 12)));
 }
 
+function normalizeMotionName(value) {
+  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+}
+
+function getMotionId(exercise) {
+  if (EXERCISE_MOTION_IDS[exercise.name]) return EXERCISE_MOTION_IDS[exercise.name];
+  const searchable = normalizeMotionName(`${exercise.name} ${exercise.muscle || ""}`);
+  return MOTION_FALLBACKS.find(([term]) => searchable.includes(term))?.[1] || null;
+}
+
+function getMotionIllustrationType(motionId) {
+  if (/Leg_Press|Calf_Press/.test(motionId)) return "leg-press";
+  if (/Hip_Thrust|Hip_Raise|Bench_Press|Lying_Leg/.test(motionId)) return "floor";
+  if (/Plank|Side_Bridge/.test(motionId)) return "plank";
+  if (/Thigh_|Leg_Extensions|Seated_|Butterfly|Cable_Crunch/.test(motionId)) return "machine";
+  if (/Pulldown|Face_Pull|Pushdown|Glute_Kickback/.test(motionId)) return "cable";
+  if (/Walking|Lunge|Stretch|Hip_Flexor/.test(motionId)) return "walking";
+  return "standing";
+}
+
+function renderMotionIllustration(exercise, motionId) {
+  const type = getMotionIllustrationType(motionId);
+  const safeId = String(exercise.id || motionId).replace(/[^a-zA-Z0-9_-]/g, "");
+  const skin = "#f3b7a5";
+  const legging = "#cf8eff";
+  const shoe = "#efe6fa";
+  const equipment = {
+    "leg-press": '<path d="M76 186h259M109 179l49-63h81l50-64m-5-5 30 25m-149 98h61" stroke="#a99abd" stroke-width="9"/><path class="motion-machine-load" d="m280 48 34 25" stroke="#d7cde3" stroke-width="12"/><rect x="128" y="116" width="51" height="12" rx="6" fill="#877593" transform="rotate(-17 128 116)"/>',
+    floor: '<path d="M82 179h246M97 159h75m-69 0v19m56-19v19" stroke="#a99abd" stroke-width="8"/><path class="motion-machine-load" d="M181 107h98m-97-11v22m98-22v22" stroke="#d5cadd" stroke-width="9"/>',
+    plank: '<path d="M93 180h236" stroke="#a99abd" stroke-width="7"/><rect x="113" y="174" width="185" height="10" rx="5" fill="#9779b1"/>',
+    machine: '<path d="M95 180h220m-183 0V77m0 31h69m-25 44h78m-18 0v28m65-74v74" stroke="#a99abd" stroke-width="8"/><rect x="127" y="92" width="20" height="53" rx="8" fill="#785f87"/><rect x="174" y="145" width="77" height="13" rx="6" fill="#785f87"/><path class="motion-machine-load" d="M299 114h-42m41 15h-30" stroke="#d5cadd" stroke-width="8"/>',
+    cable: '<path d="M100 182h237M112 182V52h203v130m-203-34h53" stroke="#a99abd" stroke-width="8"/><circle cx="310" cy="68" r="8" fill="#d6cbe1"/><path class="motion-machine-load" d="m307 70-65 55" stroke="#d6cbe1" stroke-width="4"/><path d="M105 95h17m-17 15h17m-17 15h17" stroke="#705f7b" stroke-width="6"/>',
+    walking: '<path d="M85 183h242m-22 0 21-86m-82 5h86" stroke="#a99abd" stroke-width="8"/><path d="M115 175h175" stroke="#786884" stroke-width="9"/>',
+    standing: '<path d="M87 183h243m-214 0V75m193 108V75m-199 17h27m160 0h25" stroke="#a99abd" stroke-width="8"/><path class="motion-machine-load" d="M153 88h121m-113-12v24m106-24v24" stroke="#ded4e8" stroke-width="8"/>'
+  }[type];
+
+  const people = {
+    "leg-press": `<g class="motion-person"><path d="m163 133 28 15 37-9" stroke="${skin}" stroke-width="10"/><path d="m174 132 43 22" stroke="#bd78ed" stroke-width="22"/><g class="motion-leg-back"><path d="m213 151 38-30 25-32" stroke="${legging}" stroke-width="15"/><path d="m270 87 14 10" stroke="${shoe}" stroke-width="9"/></g><g class="motion-leg-front"><path d="m212 151 45-26 28-37" stroke="${legging}" stroke-width="15"/><path d="m281 85 15 10" stroke="${shoe}" stroke-width="9"/></g><circle cx="157" cy="112" r="15" fill="${skin}"/><path d="M141 110c0-19 25-25 32-4l-6 7-8-12-18 12z" fill="#342435"/></g>`,
+    floor: `<g class="motion-person"><circle cx="155" cy="131" r="14" fill="${skin}"/><path d="M140 126c2-15 24-18 29-1l-9 6-8-10-12 10z" fill="#342435"/><path d="m167 143 47 3 29-25" stroke="#be7dec" stroke-width="22"/><g class="motion-leg-back"><path d="m232 130 25 26 22 15" stroke="${legging}" stroke-width="15"/><path d="m275 172 15-1" stroke="${shoe}" stroke-width="9"/></g><g class="motion-leg-front"><path d="m233 125 31 24 17 22" stroke="${legging}" stroke-width="15"/><path d="m276 173 17-1" stroke="${shoe}" stroke-width="9"/></g><path d="m184 141 28-26 28 1" stroke="${skin}" stroke-width="9"/></g>`,
+    plank: `<g class="motion-person"><circle cx="151" cy="117" r="14" fill="${skin}"/><path d="M137 111c3-14 25-17 29-1l-9 6-9-10-11 11z" fill="#342435"/><path d="m161 128 63 13" stroke="#bd78ed" stroke-width="21"/><path class="motion-arm-front" d="m173 135-15 32-23 4" stroke="${skin}" stroke-width="10"/><g class="motion-leg-front"><path d="m220 141 45 13 37 14" stroke="${legging}" stroke-width="15"/><path d="m296 172 16-1" stroke="${shoe}" stroke-width="9"/></g></g>`,
+    machine: `<g class="motion-person"><circle cx="175" cy="89" r="14" fill="${skin}"/><path d="M160 84c1-17 26-20 31-2l-8 8-9-13-14 13z" fill="#342435"/><path d="m175 109 4 36 45 5" stroke="#bd78ed" stroke-width="20"/><path class="motion-arm-front" d="m183 114 25 20 29-11" stroke="${skin}" stroke-width="9"/><g class="motion-leg-back"><path d="m223 151 29 10 21 7" stroke="${legging}" stroke-width="15"/><path d="m270 170 15-1" stroke="${shoe}" stroke-width="9"/></g><g class="motion-leg-front"><path d="m223 150 29 3 29 6" stroke="${legging}" stroke-width="15"/><path d="m280 162 14-2" stroke="${shoe}" stroke-width="9"/></g></g>`,
+    cable: `<g class="motion-person"><circle cx="194" cy="86" r="14" fill="${skin}"/><path d="M179 82c2-17 27-20 32-2l-8 7-10-12-14 13z" fill="#342435"/><path d="m192 105 3 41" stroke="#bd78ed" stroke-width="21"/><g class="motion-arm-front"><path d="m201 112 27 20 26-18" stroke="${skin}" stroke-width="10"/></g><g class="motion-leg-back"><path d="m192 142 20 28" stroke="${legging}" stroke-width="15"/><path d="m208 174 16-1" stroke="${shoe}" stroke-width="9"/></g><g class="motion-leg-front"><path d="m198 141-10 30" stroke="${legging}" stroke-width="15"/><path d="m181 175 17-1" stroke="${shoe}" stroke-width="9"/></g></g>`,
+    walking: `<g class="motion-person"><circle cx="190" cy="77" r="14" fill="${skin}"/><path d="M175 73c2-17 27-20 32-2l-8 7-10-12-14 13z" fill="#342435"/><path d="m189 98 6 43" stroke="#bd78ed" stroke-width="21"/><g class="motion-arm-front"><path d="m195 108 25 19 24-14" stroke="${skin}" stroke-width="10"/></g><g class="motion-leg-back"><path d="m190 140-23 31" stroke="${legging}" stroke-width="15"/><path d="m156 175 19-1" stroke="${shoe}" stroke-width="9"/></g><g class="motion-leg-front"><path d="m198 141 26 26" stroke="${legging}" stroke-width="15"/><path d="m220 172 19-1" stroke="${shoe}" stroke-width="9"/></g></g>`,
+    standing: `<g class="motion-person"><circle cx="199" cy="73" r="15" fill="${skin}"/><path d="M183 68c2-19 29-23 34-2l-9 8-10-13-15 14z" fill="#342435"/><path d="m197 95 3 42" stroke="#bd78ed" stroke-width="23"/><g class="motion-arm-front"><path d="m200 104 24 23 27-28" stroke="${skin}" stroke-width="10"/></g><g class="motion-leg-back"><path d="m197 134-15 34" stroke="${legging}" stroke-width="16"/><path d="m174 173 18-1" stroke="${shoe}" stroke-width="9"/></g><g class="motion-leg-front"><path d="m204 134 17 35" stroke="${legging}" stroke-width="16"/><path d="m215 173 19-1" stroke="${shoe}" stroke-width="9"/></g></g>`
+  }[type];
+
+  return `<svg class="motion-illustration motion-type-${type}" viewBox="0 0 420 220" role="img" aria-label="Ilustração animada de ${escapeHTML(exercise.name)}" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="motion-bg-${safeId}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#21132d"/><stop offset="1" stop-color="#372044"/></linearGradient></defs><rect width="420" height="220" fill="url(#motion-bg-${safeId})"/><circle cx="338" cy="61" r="48" fill="#aa68ec" opacity=".08"/><circle cx="83" cy="167" r="57" fill="#f296c2" opacity=".07"/><g fill="none" stroke-linecap="round" stroke-linejoin="round">${equipment}${people}</g><text x="19" y="30" fill="#e7d4fa" font-size="11" font-family="Arial,sans-serif" font-weight="700" letter-spacing="1.3">DEMONSTRAÇÃO DO MOVIMENTO</text></svg>`;
+}
+
+function renderExerciseMotion(exercise, variant = "card") {
+  const motionId = getMotionId(exercise);
+  if (!motionId) return "";
+  const base = `${EXERCISE_IMAGE_BASE}/${encodeURIComponent(motionId)}`;
+  const fallback = `${EXERCISE_IMAGE_FALLBACK}/${encodeURIComponent(motionId)}`;
+  return `<button type="button" class="exercise-motion ${variant === "details" ? "motion-details" : ""}" data-motion="${escapeHTML(exercise.id)}" data-motion-source="${escapeHTML(motionId)}" aria-label="Pausar demonstração animada de ${escapeHTML(exercise.name)}">${renderMotionIllustration(exercise, motionId)}<img class="motion-frame motion-frame-start" src="${base}/0.jpg" data-fallback-src="${fallback}/0.jpg" alt="Posição inicial de ${escapeHTML(exercise.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><img class="motion-frame motion-frame-end" src="${base}/1.jpg" data-fallback-src="${fallback}/1.jpg" alt="Posição final de ${escapeHTML(exercise.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="motion-badge"><span class="motion-dot"></span> MOVIMENTO</span><span class="motion-helper">Toque para pausar</span></button>`;
+}
+
 function renderExercise(exercise, index) {
   const allDone = exercise.sets.length > 0 && exercise.sets.every((set) => set.done);
+  const isCollapsed = allDone && !expandedCompletedExercises.has(exercise.id);
   const typeLabel = exercise.unit === "seg" ? "Tempo" : exercise.unit === "min" ? "Min" : "Reps";
   const rows = exercise.sets.map((set, setIndex) => `<tr class="set-row ${set.done ? "is-done" : ""}"><td class="set-number">${pad(setIndex + 1)}</td><td><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" value="${escapeHTML(set.weight)}" data-field="weight" data-ex="${exercise.id}" data-set="${set.id}" aria-label="Carga da série ${setIndex + 1} em quilogramas"></td><td><input type="number" inputmode="numeric" min="1" max="100" value="${escapeHTML(set.reps)}" data-field="reps" data-ex="${exercise.id}" data-set="${set.id}" aria-label="${typeLabel} da série ${setIndex + 1}"></td><td><input type="number" inputmode="numeric" min="15" max="600" step="15" value="${escapeHTML(set.rest)}" data-field="rest" data-ex="${exercise.id}" data-set="${set.id}" aria-label="Descanso da série ${setIndex + 1} em segundos"></td><td><button class="check-button ${set.done ? "is-done" : ""}" data-check="${exercise.id}" data-set="${set.id}" aria-label="${set.done ? "Desmarcar" : "Concluir"} série ${setIndex + 1}">${icon("check")}</button></td></tr>`).join("");
-  return `<article class="exercise-card ${allDone ? "is-complete" : ""}"><div class="exercise-top"><div class="exercise-title-wrap"><span class="exercise-number">${allDone ? "✓" : pad(index + 1)}</span><div><h3>${escapeHTML(exercise.name)}</h3><p>${exercise.sets.length} séries · ${escapeHTML(exercise.target || `${exercise.sets[0]?.reps || 12} repetições`)}</p></div></div><div class="exercise-actions"><button class="icon-button" data-details="${exercise.id}" aria-label="Ver execução">${icon("info")}</button><button class="icon-button" data-edit="${exercise.id}" aria-label="Editar exercício">${icon("edit")}</button><button class="icon-button remove-exercise" data-delete="${exercise.id}" aria-label="Excluir exercício">${icon("trash")}</button></div></div><div class="exercise-tags"><span class="muscle-tag">${escapeHTML(exercise.muscle || "Personalizado")}</span><span>${escapeHTML(exercise.type || "Exercício")}</span><span>${escapeHTML(exercise.sets[0]?.rest || 90)}s de descanso</span></div><table class="set-table"><thead><tr><th>Série</th><th>Carga kg</th><th>${typeLabel}</th><th>Desc. s</th><th>✓</th></tr></thead><tbody>${rows}</tbody></table><div class="exercise-tip">${icon("sparkles")}<span>${escapeHTML(exercise.notes || "Mantenha a execução controlada e ajuste a carga ao seu nível.")}</span></div><div class="exercise-footer"><button class="button button-soft" data-add-set="${exercise.id}">${icon("plus")} Série</button><button class="button button-outline" data-complete="${exercise.id}">${allDone ? "Desmarcar tudo" : "Concluir exercício"}</button></div></article>`;
+  const collapseButton = allDone ? `<button class="icon-button completed-toggle" data-toggle-completed="${exercise.id}" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? "Abrir" : "Recolher"} exercício concluído">${icon("chevron-right")}</button>` : "";
+  return `<article class="exercise-card ${allDone ? "is-complete" : ""} ${isCollapsed ? "is-collapsed" : ""}"><div class="exercise-top"><div class="exercise-title-wrap"><span class="exercise-number">${allDone ? "✓" : pad(index + 1)}</span><div><h3>${escapeHTML(exercise.name)}</h3><p>${exercise.sets.length} séries · ${escapeHTML(exercise.target || `${exercise.sets[0]?.reps || 12} repetições`)}${isCollapsed ? " · Concluído" : ""}</p></div></div><div class="exercise-actions">${collapseButton}<button class="icon-button" data-details="${exercise.id}" aria-label="Ver execução">${icon("info")}</button><button class="icon-button" data-edit="${exercise.id}" aria-label="Editar exercício">${icon("edit")}</button><button class="icon-button remove-exercise" data-delete="${exercise.id}" aria-label="Excluir exercício">${icon("trash")}</button></div></div><div class="exercise-content"><div class="exercise-tags"><span class="muscle-tag">${escapeHTML(exercise.muscle || "Personalizado")}</span><span>${escapeHTML(exercise.type || "Exercício")}</span><span>${escapeHTML(exercise.sets[0]?.rest || 90)}s de descanso</span></div>${renderExerciseMotion(exercise)}<table class="set-table"><thead><tr><th>Série</th><th>Carga kg</th><th>${typeLabel}</th><th>Desc. s</th><th>✓</th></tr></thead><tbody>${rows}</tbody></table><div class="exercise-tip">${icon("sparkles")}<span>${escapeHTML(exercise.notes || "Mantenha a execução controlada e ajuste a carga ao seu nível.")}</span></div><div class="exercise-footer"><button class="button button-soft" data-add-set="${exercise.id}">${icon("plus")} Série</button><button class="button button-outline" data-complete="${exercise.id}">${allDone ? "Desmarcar tudo" : "Concluir exercício"}</button></div></div></article>`;
 }
 
 function renderWorkout() {
@@ -378,6 +493,7 @@ function toggleSet(exerciseId, setId) {
   const set = exercise?.sets.find((item) => item.id === setId);
   if (!set) return;
   set.done = !set.done;
+  expandedCompletedExercises.delete(exerciseId);
   if (set.done) {
     restSeconds = set.rest || 90;
     restCountdown = restSeconds;
@@ -395,10 +511,19 @@ function toggleExercise(exerciseId) {
   if (!exercise) return;
   const markDone = !exercise.sets.every((set) => set.done);
   exercise.sets.forEach((set) => { set.done = markDone; });
+  expandedCompletedExercises.delete(exerciseId);
   save();
   renderHero();
   renderWorkout();
   showToast(markDone ? "Exercício concluído. Boa!" : "Séries desmarcadas.");
+}
+
+function toggleCompletedExercise(exerciseId) {
+  const exercise = findExercise(exerciseId);
+  if (!exercise?.sets.length || !exercise.sets.every((set) => set.done)) return;
+  if (expandedCompletedExercises.has(exerciseId)) expandedCompletedExercises.delete(exerciseId);
+  else expandedCompletedExercises.add(exerciseId);
+  renderWorkout();
 }
 
 function addSet(exerciseId) {
@@ -455,7 +580,7 @@ function showExerciseDetails(exerciseId) {
   if (!exercise) return;
   $("detailsMuscle").textContent = exercise.muscle || "PERSONALIZADO";
   $("detailsName").textContent = exercise.name;
-  $("detailsContent").innerHTML = `<div class="detail-metrics"><span><strong>${exercise.sets.length}</strong>Séries</span><span><strong>${escapeHTML(exercise.target || "12")}</strong>Repetições</span><span><strong>${exercise.sets[0]?.rest || 90}s</strong>Descanso</span></div><div class="detail-block"><strong>COMO EXECUTAR</strong><p>${escapeHTML(exercise.notes || "Faça o movimento com controle, mantendo postura confortável.")}</p></div><div class="detail-block"><strong>SE O APARELHO ESTIVER OCUPADO</strong><p>${escapeHTML(exercise.alternative || "Escolha outro movimento para o mesmo grupo muscular.")}</p></div><div class="detail-block"><strong>QUANDO AUMENTAR A CARGA</strong><p>${escapeHTML(exercise.progression || "Aumente apenas quando completar todas as repetições com boa execução.")}</p></div>`;
+  $("detailsContent").innerHTML = `${renderExerciseMotion(exercise, "details")}<div class="detail-metrics"><span><strong>${exercise.sets.length}</strong>Séries</span><span><strong>${escapeHTML(exercise.target || "12")}</strong>Repetições</span><span><strong>${exercise.sets[0]?.rest || 90}s</strong>Descanso</span></div><div class="detail-block"><strong>COMO EXECUTAR</strong><p>${escapeHTML(exercise.notes || "Faça o movimento com controle, mantendo postura confortável.")}</p></div><div class="detail-block"><strong>SE O APARELHO ESTIVER OCUPADO</strong><p>${escapeHTML(exercise.alternative || "Escolha outro movimento para o mesmo grupo muscular.")}</p></div><div class="detail-block"><strong>QUANDO AUMENTAR A CARGA</strong><p>${escapeHTML(exercise.progression || "Aumente apenas quando completar todas as repetições com boa execução.")}</p></div>`;
   $("detailsVideoLink").href = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${exercise.name} execução correta musculação`)}`;
   $("exerciseDetailsDialog").showModal();
 }
@@ -470,11 +595,14 @@ function workoutElapsed() {
 function renderWorkoutTimer() {
   const timer = state.workoutTimer;
   const sameDate = !timer.date || timer.date === state.selectedDate;
+  const workoutStarted = timer.date === state.selectedDate;
   $("workoutTimer").textContent = sameDate ? formatDuration(workoutElapsed()) : "00:00:00";
-  $("timerStatus").textContent = timer.running && sameDate ? "Treino em andamento" : timer.elapsed && sameDate ? "Treino pausado" : "Pronta para começar?";
+  $("timerStatus").textContent = timer.running && sameDate ? "Treino em andamento" : workoutStarted ? "Treino pausado" : "Pronta para começar?";
   $("startWorkoutBtn").classList.toggle("hidden", timer.running && sameDate);
   $("pauseWorkoutBtn").classList.toggle("hidden", !timer.running || !sameDate);
-  $("startWorkoutBtn").innerHTML = `${icon("play")} ${timer.elapsed && sameDate ? "Continuar" : "Iniciar"}`;
+  $("startWorkoutBtn").innerHTML = `${icon("play")} ${workoutStarted ? "Continuar" : "Iniciar"}`;
+  $("finishWorkoutBtn").disabled = !workoutStarted;
+  $("finishWorkoutBtn").setAttribute("aria-disabled", String(!workoutStarted));
 }
 
 function startWorkout() {
@@ -512,6 +640,7 @@ function startRest() {
 function openFinishDialog() {
   const stats = workoutStats();
   if (!stats.totalSets) return showToast("Hoje é dia de recuperação; não há treino para finalizar.");
+  if (state.workoutTimer.date !== state.selectedDate) return showToast("Inicie o treino antes de finalizar.");
   if (!stats.doneSets) return showToast("Marque pelo menos uma série antes de finalizar.");
   const duration = state.workoutTimer.date === state.selectedDate ? workoutElapsed() : 0;
   $("finishSummary").innerHTML = `<div class="finish-stat"><strong>${stats.doneSets}/${stats.totalSets}</strong><span>Séries</span></div><div class="finish-stat"><strong>${formatDuration(duration).slice(0, 5)}</strong><span>Tempo</span></div><div class="finish-stat"><strong>${formatNumber(stats.volume)} kg</strong><span>Volume</span></div>`;
@@ -570,7 +699,7 @@ function resetPlan() {
   const fresh = createMonth(selectedDate());
   current.workouts = fresh.workouts;
   for (const [key, session] of Object.entries(state.sessions)) if (key.startsWith(`${current.id}-`) && !session.completed) delete state.sessions[key];
-  save(); renderAll(); showToast("Plano original restaurado.");
+  save(); renderAll(); showToast("Treinos originais restaurados.");
 }
 
 function countStreak() {
@@ -700,10 +829,18 @@ function renderAll() {
 document.addEventListener("click", (event) => {
   const trigger = event.target.closest("button");
   if (!trigger) return;
+  if (trigger.dataset.motion) {
+    const paused = trigger.classList.toggle("is-paused");
+    const helper = trigger.querySelector(".motion-helper");
+    if (helper) helper.textContent = paused ? "Toque para continuar" : "Toque para pausar";
+    trigger.setAttribute("aria-label", `${paused ? "Continuar" : "Pausar"} demonstração animada`);
+    return;
+  }
   if (trigger.dataset.selectDate) return setSelectedDate(trigger.dataset.selectDate);
   if (trigger.dataset.planDay !== undefined) return openPlanDay(Number(trigger.dataset.planDay));
   if (trigger.dataset.check) return toggleSet(trigger.dataset.check, trigger.dataset.set);
   if (trigger.dataset.complete) return toggleExercise(trigger.dataset.complete);
+  if (trigger.dataset.toggleCompleted) return toggleCompletedExercise(trigger.dataset.toggleCompleted);
   if (trigger.dataset.addSet) return addSet(trigger.dataset.addSet);
   if (trigger.dataset.details) return showExerciseDetails(trigger.dataset.details);
   if (trigger.dataset.edit) return openExerciseDialog(trigger.dataset.edit);
@@ -712,6 +849,36 @@ document.addEventListener("click", (event) => {
   if (trigger.dataset.view) return showView(trigger.dataset.view);
   if (trigger.dataset.time) { restSeconds = Number(trigger.dataset.time); restCountdown = restSeconds; clearInterval(restInterval); $("restTimer").textContent = formatRest(restCountdown); $("startRestBtn").innerHTML = `${icon("play")} Iniciar`; updateRestPresets(); }
 });
+
+document.addEventListener("load", (event) => {
+  const image = event.target;
+  if (!image.classList?.contains("motion-frame")) return;
+  const motion = image.closest(".exercise-motion");
+  if (!motion) return;
+  image.classList.add("is-loaded");
+  const first = motion.querySelector(".motion-frame-start");
+  const last = motion.querySelector(".motion-frame-end");
+  if (first?.classList.contains("is-loaded") && last?.classList.contains("is-loaded")) motion.classList.add("has-motion-photos");
+}, true);
+
+document.addEventListener("error", (event) => {
+  const image = event.target;
+  if (!image.classList?.contains("motion-frame")) return;
+  const motion = image.closest(".exercise-motion");
+  if (!motion) return;
+  if (image.dataset.fallbackSrc && !image.dataset.fallbackTried) {
+    image.dataset.fallbackTried = "true";
+    image.src = image.dataset.fallbackSrc;
+    return;
+  }
+  if (image.classList.contains("motion-frame-end")) {
+    image.remove();
+    motion.classList.add("single-frame");
+    return;
+  }
+  image.remove();
+  motion.classList.add("illustration-only");
+}, true);
 
 document.addEventListener("change", (event) => {
   const input = event.target;
@@ -744,6 +911,12 @@ $("importFileInput").addEventListener("change", (event) => importData(event.targ
 window.addEventListener("beforeinstallprompt", (event) => { event.preventDefault(); deferredPrompt = event; $("installBtn").classList.remove("hidden"); });
 $("installBtn").addEventListener("click", async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $("installBtn").classList.add("hidden"); });
 window.addEventListener("appinstalled", () => { $("installBtn").classList.add("hidden"); showToast("IRON Purple instalado com sucesso."); });
-if ("serviceWorker" in navigator && ["http:", "https:"].includes(location.protocol)) window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+if ("serviceWorker" in navigator && ["http:", "https:"].includes(location.protocol)) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`, { updateViaCache: "none" })
+      .then((registration) => registration.update())
+      .catch(() => {});
+  });
+}
 if (state.workoutTimer.running) workoutInterval = setInterval(renderWorkoutTimer, 1000);
 renderAll(); renderProfile(); $("restTimer").textContent = formatRest(restCountdown); save();

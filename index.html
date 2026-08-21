@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-  <style data-iron-bundle="final-3">
+  <style data-iron-bundle="usabilidade-1">
 :root {
   color-scheme: dark;
   --background: #0d0815;
@@ -47,6 +47,7 @@ body {
 }
 button, input, select, textarea { font: inherit; }
 button { border: 0; cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .42; transform: none !important; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 3px; }
 a { color: inherit; }
 p, h1, h2, h3 { margin: 0; }
@@ -140,6 +141,9 @@ p, h1, h2, h3 { margin: 0; }
 .exercise-list { display: grid; gap: 12px; }
 .exercise-card { overflow: hidden; padding: 16px; border: 1px solid var(--line); border-radius: 21px; background: var(--surface); }
 .exercise-card.is-complete { border-color: rgba(104, 220, 172, .35); }
+.exercise-card.is-collapsed { padding-top: 13px; padding-bottom: 13px; background: linear-gradient(145deg, rgba(28, 44, 40, .82), rgba(22, 15, 30, .98)); }
+.exercise-card.is-collapsed .exercise-content { display: none; }
+.exercise-card.is-collapsed .exercise-title-wrap p { color: var(--green); }
 .exercise-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .exercise-number { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: var(--purple-bright); background: rgba(168, 113, 251, .13); font-size: 11px; font-weight: 800; }
 .exercise-card.is-complete .exercise-number { color: var(--green); background: rgba(104, 220, 172, .12); }
@@ -150,26 +154,29 @@ p, h1, h2, h3 { margin: 0; }
 .exercise-actions .icon-button { min-width: 33px; min-height: 33px; padding: 7px; border-color: transparent; background: transparent; }
 .exercise-actions .icon-button svg { width: 16px; height: 16px; }
 .exercise-actions .remove-exercise { color: var(--danger); }
+.exercise-actions .completed-toggle { color: var(--green); }
+.exercise-actions .completed-toggle svg { transition: transform .18s ease; }
+.exercise-card.is-complete:not(.is-collapsed) .completed-toggle svg { transform: rotate(90deg); }
 .exercise-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 13px 0 11px; }
 .exercise-tags span { padding: 5px 7px; border-radius: 7px; color: #d9ccea; background: var(--surface-soft); font-size: 10px; }
 .exercise-tags .muscle-tag { color: #f6b2d7; }
 .exercise-motion { position: relative; display: block; width: 100%; min-height: 185px; margin: 4px 0 13px; overflow: hidden; border: 1px solid rgba(166, 107, 255, .18); border-radius: 15px; background: #21132d; }
 .motion-illustration { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 .motion-illustration .motion-person, .motion-illustration .motion-arm-front, .motion-illustration .motion-leg-front, .motion-illustration .motion-leg-back, .motion-illustration .motion-machine-load { transform-box: fill-box; transform-origin: center; }
-.motion-illustration .motion-person { animation: motion-body 2s ease-in-out infinite; }
-.motion-illustration .motion-arm-front { animation: motion-arm 2s ease-in-out infinite; }
-.motion-illustration .motion-leg-front { animation: motion-leg 2s ease-in-out infinite; }
-.motion-illustration .motion-leg-back { animation: motion-leg 2s ease-in-out infinite reverse; }
-.motion-illustration .motion-machine-load { animation: motion-load 2s ease-in-out infinite; }
-.motion-type-leg-press .motion-person, .motion-type-machine .motion-person { animation: motion-seated 2s ease-in-out infinite; }
-.motion-type-floor .motion-person { animation: motion-hip-raise 2s ease-in-out infinite; }
-.motion-type-plank .motion-person { animation: motion-plank 2s ease-in-out infinite; }
-.motion-type-walking .motion-leg-front, .motion-type-walking .motion-leg-back { animation-duration: 1.2s; }
+.motion-illustration .motion-person { animation: motion-body 3.2s ease-in-out infinite; }
+.motion-illustration .motion-arm-front { animation: motion-arm 3.2s ease-in-out infinite; }
+.motion-illustration .motion-leg-front { animation: motion-leg 3.2s ease-in-out infinite; }
+.motion-illustration .motion-leg-back { animation: motion-leg 3.2s ease-in-out infinite reverse; }
+.motion-illustration .motion-machine-load { animation: motion-load 3.2s ease-in-out infinite; }
+.motion-type-leg-press .motion-person, .motion-type-machine .motion-person { animation: motion-seated 3.2s ease-in-out infinite; }
+.motion-type-floor .motion-person { animation: motion-hip-raise 3.2s ease-in-out infinite; }
+.motion-type-plank .motion-person { animation: motion-plank 3.2s ease-in-out infinite; }
+.motion-type-walking .motion-leg-front, .motion-type-walking .motion-leg-back { animation-duration: 2.4s; }
 .motion-frame { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: #fff; opacity: 0; visibility: hidden; }
 .motion-frame-start.is-loaded { opacity: 1; visibility: visible; }
 .motion-frame-end.is-loaded { visibility: visible; }
-.has-motion-photos .motion-frame-start { animation: motion-frame-start 2.6s ease-in-out infinite; }
-.has-motion-photos .motion-frame-end { animation: motion-frame-end 2.6s ease-in-out infinite; }
+.has-motion-photos .motion-frame-start { animation: motion-frame-start 4s ease-in-out infinite; }
+.has-motion-photos .motion-frame-end { animation: motion-frame-end 4s ease-in-out infinite; }
 @keyframes motion-frame-start { 0%, 38% { opacity: 1; } 48%, 88% { opacity: 0; } 98%, 100% { opacity: 1; } }
 @keyframes motion-frame-end { 0%, 38% { opacity: 0; } 48%, 88% { opacity: 1; } 98%, 100% { opacity: 0; } }
 @keyframes motion-body { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(12px); } }
@@ -294,7 +301,7 @@ textarea { min-height: 82px; resize: vertical; }
 .bottom-nav { position: relative; z-index: 1; display: grid; width: 100%; margin: 28px 0 0; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 7px; border: 1px solid rgba(224, 206, 246, .14); border-radius: 21px; background: #160f1e; box-shadow: 0 17px 48px rgba(0, 0, 0, .34); isolation: isolate; }
 .nav-item { display: grid; min-height: 54px; place-items: center; gap: 3px; padding: 7px 3px; border-radius: 14px; color: var(--quiet); background: transparent; }
 .nav-item svg { width: 20px; height: 20px; }
-.nav-item span { font-size: 9px; font-weight: 650; }
+.nav-item span { font-size: 9px; font-weight: 650; white-space: nowrap; }
 .nav-item.is-active { color: #fff; background: linear-gradient(145deg, rgba(154, 99, 240, .31), rgba(118, 66, 205, .19)); }
 .nav-item.is-active svg { color: var(--purple-bright); }
 
@@ -421,7 +428,7 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
           <button id="goToTodayBtn" class="button button-soft full-width">Voltar para hoje</button>
         </section>
 
-        <section id="workoutControlCard" class="workout-control surface"><div><p class="eyebrow">TEMPO DE TREINO</p><strong id="workoutTimer">00:00:00</strong><span id="timerStatus">Pronta para começar?</span></div><div class="workout-control-actions"><button id="startWorkoutBtn" class="button button-primary"><svg><use href="#i-play"/></svg> Iniciar</button><button id="pauseWorkoutBtn" class="button button-soft hidden"><svg><use href="#i-pause"/></svg> Pausar</button><button id="finishWorkoutBtn" class="button button-outline">Finalizar</button></div></section>
+        <section id="workoutControlCard" class="workout-control surface"><div><p class="eyebrow">TEMPO DE TREINO</p><strong id="workoutTimer">00:00:00</strong><span id="timerStatus">Pronta para começar?</span></div><div class="workout-control-actions"><button id="startWorkoutBtn" class="button button-primary"><svg><use href="#i-play"/></svg> Iniciar</button><button id="pauseWorkoutBtn" class="button button-soft hidden"><svg><use href="#i-pause"/></svg> Pausar</button><button id="finishWorkoutBtn" class="button button-outline" disabled aria-disabled="true">Finalizar</button></div></section>
 
         <section id="prepCard" class="prep-card"><svg><use href="#i-sparkles"/></svg><div><strong>Aquecimento inteligente</strong><p id="warmupText"></p></div></section>
 
@@ -435,14 +442,14 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
         <section class="water-card surface"><div class="section-heading"><div><p class="eyebrow">CUIDE DE VOCÊ</p><h2>Água de hoje</h2></div><svg class="water-icon"><use href="#i-drop"/></svg></div><div class="water-progress-track"><span id="waterProgressFill"></span></div><div class="water-footer"><strong id="waterAmount">0 / 2.200 ml</strong><div><button id="removeWaterBtn" class="icon-button" aria-label="Remover 250 ml"><svg><use href="#i-minus"/></svg></button><button id="addWaterBtn" class="button button-soft button-small"><svg><use href="#i-plus"/></svg> 250 ml</button></div></div></section>
       </section>
 
-      <section id="planView" class="view" aria-label="Plano de treino"><div class="page-heading"><p class="eyebrow">SEU PLANO</p><h1>Construído para evoluir.</h1><p>Três treinos de pernas e glúteos, dois de superiores e tempo real para recuperação.</p></div><section id="planOverview" class="plan-overview"></section><section id="planDays" class="plan-days"></section><section class="guidance-card surface"><p class="eyebrow">PARA TER RESULTADO</p><h2>Regras que fazem diferença</h2><div id="trainingGuidelines" class="guideline-list"></div></section><button id="resetPlanBtn" class="button button-outline full-width">Restaurar plano original do mês</button></section>
+      <section id="planView" class="view" aria-label="Treinos"><div class="page-heading"><p class="eyebrow">SEUS TREINOS</p><h1>Construído para evoluir.</h1><p>Três treinos de pernas e glúteos, dois de superiores e tempo real para recuperação.</p></div><section id="planOverview" class="plan-overview"></section><section id="planDays" class="plan-days"></section><section class="guidance-card surface"><p class="eyebrow">PARA TER RESULTADO</p><h2>Regras que fazem diferença</h2><div id="trainingGuidelines" class="guideline-list"></div></section><button id="resetPlanBtn" class="button button-outline full-width">Restaurar treinos originais do mês</button></section>
 
       <section id="progressView" class="view" aria-label="Evolução"><div class="page-heading"><p class="eyebrow">SUA EVOLUÇÃO</p><h1>Constância vira resultado.</h1><p id="progressPeriodLabel"></p></div><section id="progressStats" class="stats-grid"></section><section class="chart-card surface"><div class="section-heading"><div><p class="eyebrow">ÚLTIMAS SEMANAS</p><h2>Treinos concluídos</h2></div><svg class="heading-icon"><use href="#i-chart"/></svg></div><div id="weeklyChart" class="weekly-chart"></div></section><section class="records-card surface"><div class="section-heading"><div><p class="eyebrow">PARABÉNS</p><h2>Suas melhores cargas</h2></div><svg class="heading-icon"><use href="#i-trophy"/></svg></div><div id="personalRecords"></div></section><section class="history-card surface"><div class="section-heading"><div><p class="eyebrow">HISTÓRICO</p><h2>Treinos finalizados</h2></div><span id="historyCount" class="count-badge">0</span></div><div id="historyList" class="history-list"></div></section></section>
 
       <section id="profileView" class="view" aria-label="Perfil e configurações"><div class="page-heading"><p class="eyebrow">SEU ESPAÇO</p><h1>Feito para você.</h1><p>Personalize suas metas sem complicar a rotina.</p></div><section class="profile-identity surface"><div id="profileAvatar" class="profile-avatar">J</div><div><h2 id="profileDisplayName">Jéssica</h2><p id="profileGoalLabel">Hipertrofia e definição</p></div></section><section class="profile-form surface"><div class="section-heading"><div><p class="eyebrow">INFORMAÇÕES PESSOAIS</p><h2>Minhas metas</h2></div></div><label>Como você quer ser chamada?<input id="profileName" type="text" maxlength="35" autocomplete="given-name" /></label><div class="form-grid"><label>Peso atual (kg)<input id="profileWeight" type="number" min="25" max="350" step="0.1" /></label><label>Altura (cm)<input id="profileHeight" type="number" min="100" max="250" /></label></div><label>Objetivo principal<select id="profileGoal"><option>Hipertrofia e definição</option><option>Ganhar massa muscular</option><option>Definição corporal</option><option>Força e condicionamento</option><option>Bem-estar e constância</option></select></label><div class="form-grid"><label>Treinos por semana<select id="profileWeeklyGoal"><option value="3">3 dias</option><option value="4">4 dias</option><option value="5">5 dias</option><option value="6">6 dias</option></select></label><label>Meta de água (ml)<input id="profileWaterGoal" type="number" min="500" max="6000" step="100" /></label></div><label class="toggle-row"><span><strong>Descanso automático</strong><small>Iniciar o intervalo ao concluir uma série.</small></span><input id="profileAutoRest" type="checkbox" /></label><button id="saveProfileBtn" class="button button-primary full-width">Salvar minhas metas</button></section><section id="wellnessCard" class="wellness-card surface"></section><section class="backup-card surface"><p class="eyebrow">SEUS DADOS</p><h2>Segurança e backup</h2><p>Seu histórico e suas cargas ficam salvos neste navegador. Exporte um backup antes de trocar de aparelho ou limpar os dados.</p><div class="backup-actions"><button id="exportDataBtn" class="button button-soft"><svg><use href="#i-download"/></svg> Baixar backup</button><button id="importDataBtn" class="button button-outline"><svg><use href="#i-upload"/></svg> Restaurar</button><input id="importFileInput" type="file" accept="application/json,.json" class="hidden" /></div></section><p class="app-version">IRON Purple · seu ritmo, sua força.</p></section>
     </main>
 
-    <nav class="bottom-nav" aria-label="Navegação principal"><button class="nav-item is-active" data-view="today"><svg><use href="#i-home"/></svg><span>Treino</span></button><button class="nav-item" data-view="plan"><svg><use href="#i-calendar"/></svg><span>Plano</span></button><button class="nav-item" data-view="progress"><svg><use href="#i-chart"/></svg><span>Evolução</span></button><button class="nav-item" data-view="profile"><svg><use href="#i-user"/></svg><span>Perfil</span></button></nav>
+    <nav class="bottom-nav" aria-label="Navegação principal"><button class="nav-item is-active" data-view="today"><svg><use href="#i-home"/></svg><span>Treino do dia</span></button><button class="nav-item" data-view="plan"><svg><use href="#i-calendar"/></svg><span>Treinos</span></button><button class="nav-item" data-view="progress"><svg><use href="#i-chart"/></svg><span>Evolução</span></button><button class="nav-item" data-view="profile"><svg><use href="#i-user"/></svg><span>Perfil</span></button></nav>
   </div>
 
   <dialog id="exerciseDialog"><form method="dialog" class="dialog-card"><div class="dialog-heading"><div><p class="eyebrow">PERSONALIZE</p><h2 id="exerciseDialogTitle">Novo exercício</h2></div><button type="button" class="icon-button dialog-close" data-close-dialog="exerciseDialog" aria-label="Fechar"><svg><use href="#i-close"/></svg></button></div><input type="hidden" id="editingExerciseId" /><label>Nome do exercício<input id="exerciseName" placeholder="Ex.: Agachamento livre" maxlength="90" /></label><div class="form-grid"><label>Séries<input id="exerciseSets" type="number" value="3" min="1" max="12" /></label><label>Repetições<input id="exerciseReps" type="number" value="12" min="1" max="100" /></label></div><div class="form-grid"><label>Carga inicial (kg)<input id="exerciseWeight" type="number" value="0" min="0" max="1000" step="0.5" /></label><label>Descanso (seg)<input id="exerciseRest" type="number" value="90" min="15" max="600" step="15" /></label></div><label>Grupo muscular<input id="exerciseMuscle" placeholder="Ex.: Glúteos e quadríceps" maxlength="70" /></label><label>Como executar<textarea id="exerciseNotes" placeholder="Dica para lembrar da execução correta." maxlength="300"></textarea></label><div class="dialog-actions"><button type="button" class="button button-outline dialog-close" data-close-dialog="exerciseDialog">Cancelar</button><button type="button" id="saveExerciseBtn" class="button button-primary">Salvar exercício</button></div></form></dialog>
@@ -452,7 +459,7 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
   <dialog id="exerciseDetailsDialog"><div class="dialog-card details-dialog"><div class="dialog-heading"><div><p id="detailsMuscle" class="eyebrow"></p><h2 id="detailsName"></h2></div><button type="button" class="icon-button dialog-close" data-close-dialog="exerciseDetailsDialog" aria-label="Fechar"><svg><use href="#i-close"/></svg></button></div><div id="detailsContent"></div><a id="detailsVideoLink" class="button button-primary full-width" target="_blank" rel="noopener noreferrer">Ver execução em vídeo</a></div></dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script data-iron-bundle="final-3">
+  <script data-iron-bundle="usabilidade-1">
 "use strict";
 
 const STORAGE_KEY = "ironPurpleState";
@@ -460,7 +467,7 @@ const SCHEMA_VERSION = 4;
 const WEEKDAYS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 const SHORT_DAYS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
 const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-const APP_VERSION = "2026-08-18-final-3";
+const APP_VERSION = "2026-08-21-usabilidade-1";
 const EXERCISE_IMAGE_BASE = "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises";
 const EXERCISE_IMAGE_FALLBACK = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
 const EXERCISE_MOTION_IDS = Object.freeze({
@@ -726,6 +733,7 @@ let restInterval = null;
 let workoutInterval = null;
 let toastTimeout = null;
 let deferredPrompt = null;
+const expandedCompletedExercises = new Set();
 
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -912,9 +920,11 @@ function renderExerciseMotion(exercise, variant = "card") {
 
 function renderExercise(exercise, index) {
   const allDone = exercise.sets.length > 0 && exercise.sets.every((set) => set.done);
+  const isCollapsed = allDone && !expandedCompletedExercises.has(exercise.id);
   const typeLabel = exercise.unit === "seg" ? "Tempo" : exercise.unit === "min" ? "Min" : "Reps";
   const rows = exercise.sets.map((set, setIndex) => `<tr class="set-row ${set.done ? "is-done" : ""}"><td class="set-number">${pad(setIndex + 1)}</td><td><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" value="${escapeHTML(set.weight)}" data-field="weight" data-ex="${exercise.id}" data-set="${set.id}" aria-label="Carga da série ${setIndex + 1} em quilogramas"></td><td><input type="number" inputmode="numeric" min="1" max="100" value="${escapeHTML(set.reps)}" data-field="reps" data-ex="${exercise.id}" data-set="${set.id}" aria-label="${typeLabel} da série ${setIndex + 1}"></td><td><input type="number" inputmode="numeric" min="15" max="600" step="15" value="${escapeHTML(set.rest)}" data-field="rest" data-ex="${exercise.id}" data-set="${set.id}" aria-label="Descanso da série ${setIndex + 1} em segundos"></td><td><button class="check-button ${set.done ? "is-done" : ""}" data-check="${exercise.id}" data-set="${set.id}" aria-label="${set.done ? "Desmarcar" : "Concluir"} série ${setIndex + 1}">${icon("check")}</button></td></tr>`).join("");
-  return `<article class="exercise-card ${allDone ? "is-complete" : ""}"><div class="exercise-top"><div class="exercise-title-wrap"><span class="exercise-number">${allDone ? "✓" : pad(index + 1)}</span><div><h3>${escapeHTML(exercise.name)}</h3><p>${exercise.sets.length} séries · ${escapeHTML(exercise.target || `${exercise.sets[0]?.reps || 12} repetições`)}</p></div></div><div class="exercise-actions"><button class="icon-button" data-details="${exercise.id}" aria-label="Ver execução">${icon("info")}</button><button class="icon-button" data-edit="${exercise.id}" aria-label="Editar exercício">${icon("edit")}</button><button class="icon-button remove-exercise" data-delete="${exercise.id}" aria-label="Excluir exercício">${icon("trash")}</button></div></div><div class="exercise-tags"><span class="muscle-tag">${escapeHTML(exercise.muscle || "Personalizado")}</span><span>${escapeHTML(exercise.type || "Exercício")}</span><span>${escapeHTML(exercise.sets[0]?.rest || 90)}s de descanso</span></div>${renderExerciseMotion(exercise)}<table class="set-table"><thead><tr><th>Série</th><th>Carga kg</th><th>${typeLabel}</th><th>Desc. s</th><th>✓</th></tr></thead><tbody>${rows}</tbody></table><div class="exercise-tip">${icon("sparkles")}<span>${escapeHTML(exercise.notes || "Mantenha a execução controlada e ajuste a carga ao seu nível.")}</span></div><div class="exercise-footer"><button class="button button-soft" data-add-set="${exercise.id}">${icon("plus")} Série</button><button class="button button-outline" data-complete="${exercise.id}">${allDone ? "Desmarcar tudo" : "Concluir exercício"}</button></div></article>`;
+  const collapseButton = allDone ? `<button class="icon-button completed-toggle" data-toggle-completed="${exercise.id}" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? "Abrir" : "Recolher"} exercício concluído">${icon("chevron-right")}</button>` : "";
+  return `<article class="exercise-card ${allDone ? "is-complete" : ""} ${isCollapsed ? "is-collapsed" : ""}"><div class="exercise-top"><div class="exercise-title-wrap"><span class="exercise-number">${allDone ? "✓" : pad(index + 1)}</span><div><h3>${escapeHTML(exercise.name)}</h3><p>${exercise.sets.length} séries · ${escapeHTML(exercise.target || `${exercise.sets[0]?.reps || 12} repetições`)}${isCollapsed ? " · Concluído" : ""}</p></div></div><div class="exercise-actions">${collapseButton}<button class="icon-button" data-details="${exercise.id}" aria-label="Ver execução">${icon("info")}</button><button class="icon-button" data-edit="${exercise.id}" aria-label="Editar exercício">${icon("edit")}</button><button class="icon-button remove-exercise" data-delete="${exercise.id}" aria-label="Excluir exercício">${icon("trash")}</button></div></div><div class="exercise-content"><div class="exercise-tags"><span class="muscle-tag">${escapeHTML(exercise.muscle || "Personalizado")}</span><span>${escapeHTML(exercise.type || "Exercício")}</span><span>${escapeHTML(exercise.sets[0]?.rest || 90)}s de descanso</span></div>${renderExerciseMotion(exercise)}<table class="set-table"><thead><tr><th>Série</th><th>Carga kg</th><th>${typeLabel}</th><th>Desc. s</th><th>✓</th></tr></thead><tbody>${rows}</tbody></table><div class="exercise-tip">${icon("sparkles")}<span>${escapeHTML(exercise.notes || "Mantenha a execução controlada e ajuste a carga ao seu nível.")}</span></div><div class="exercise-footer"><button class="button button-soft" data-add-set="${exercise.id}">${icon("plus")} Série</button><button class="button button-outline" data-complete="${exercise.id}">${allDone ? "Desmarcar tudo" : "Concluir exercício"}</button></div></div></article>`;
 }
 
 function renderWorkout() {
@@ -945,6 +955,7 @@ function toggleSet(exerciseId, setId) {
   const set = exercise?.sets.find((item) => item.id === setId);
   if (!set) return;
   set.done = !set.done;
+  expandedCompletedExercises.delete(exerciseId);
   if (set.done) {
     restSeconds = set.rest || 90;
     restCountdown = restSeconds;
@@ -962,10 +973,19 @@ function toggleExercise(exerciseId) {
   if (!exercise) return;
   const markDone = !exercise.sets.every((set) => set.done);
   exercise.sets.forEach((set) => { set.done = markDone; });
+  expandedCompletedExercises.delete(exerciseId);
   save();
   renderHero();
   renderWorkout();
   showToast(markDone ? "Exercício concluído. Boa!" : "Séries desmarcadas.");
+}
+
+function toggleCompletedExercise(exerciseId) {
+  const exercise = findExercise(exerciseId);
+  if (!exercise?.sets.length || !exercise.sets.every((set) => set.done)) return;
+  if (expandedCompletedExercises.has(exerciseId)) expandedCompletedExercises.delete(exerciseId);
+  else expandedCompletedExercises.add(exerciseId);
+  renderWorkout();
 }
 
 function addSet(exerciseId) {
@@ -1037,11 +1057,14 @@ function workoutElapsed() {
 function renderWorkoutTimer() {
   const timer = state.workoutTimer;
   const sameDate = !timer.date || timer.date === state.selectedDate;
+  const workoutStarted = timer.date === state.selectedDate;
   $("workoutTimer").textContent = sameDate ? formatDuration(workoutElapsed()) : "00:00:00";
-  $("timerStatus").textContent = timer.running && sameDate ? "Treino em andamento" : timer.elapsed && sameDate ? "Treino pausado" : "Pronta para começar?";
+  $("timerStatus").textContent = timer.running && sameDate ? "Treino em andamento" : workoutStarted ? "Treino pausado" : "Pronta para começar?";
   $("startWorkoutBtn").classList.toggle("hidden", timer.running && sameDate);
   $("pauseWorkoutBtn").classList.toggle("hidden", !timer.running || !sameDate);
-  $("startWorkoutBtn").innerHTML = `${icon("play")} ${timer.elapsed && sameDate ? "Continuar" : "Iniciar"}`;
+  $("startWorkoutBtn").innerHTML = `${icon("play")} ${workoutStarted ? "Continuar" : "Iniciar"}`;
+  $("finishWorkoutBtn").disabled = !workoutStarted;
+  $("finishWorkoutBtn").setAttribute("aria-disabled", String(!workoutStarted));
 }
 
 function startWorkout() {
@@ -1079,6 +1102,7 @@ function startRest() {
 function openFinishDialog() {
   const stats = workoutStats();
   if (!stats.totalSets) return showToast("Hoje é dia de recuperação; não há treino para finalizar.");
+  if (state.workoutTimer.date !== state.selectedDate) return showToast("Inicie o treino antes de finalizar.");
   if (!stats.doneSets) return showToast("Marque pelo menos uma série antes de finalizar.");
   const duration = state.workoutTimer.date === state.selectedDate ? workoutElapsed() : 0;
   $("finishSummary").innerHTML = `<div class="finish-stat"><strong>${stats.doneSets}/${stats.totalSets}</strong><span>Séries</span></div><div class="finish-stat"><strong>${formatDuration(duration).slice(0, 5)}</strong><span>Tempo</span></div><div class="finish-stat"><strong>${formatNumber(stats.volume)} kg</strong><span>Volume</span></div>`;
@@ -1137,7 +1161,7 @@ function resetPlan() {
   const fresh = createMonth(selectedDate());
   current.workouts = fresh.workouts;
   for (const [key, session] of Object.entries(state.sessions)) if (key.startsWith(`${current.id}-`) && !session.completed) delete state.sessions[key];
-  save(); renderAll(); showToast("Plano original restaurado.");
+  save(); renderAll(); showToast("Treinos originais restaurados.");
 }
 
 function countStreak() {
@@ -1278,6 +1302,7 @@ document.addEventListener("click", (event) => {
   if (trigger.dataset.planDay !== undefined) return openPlanDay(Number(trigger.dataset.planDay));
   if (trigger.dataset.check) return toggleSet(trigger.dataset.check, trigger.dataset.set);
   if (trigger.dataset.complete) return toggleExercise(trigger.dataset.complete);
+  if (trigger.dataset.toggleCompleted) return toggleCompletedExercise(trigger.dataset.toggleCompleted);
   if (trigger.dataset.addSet) return addSet(trigger.dataset.addSet);
   if (trigger.dataset.details) return showExerciseDetails(trigger.dataset.details);
   if (trigger.dataset.edit) return openExerciseDialog(trigger.dataset.edit);

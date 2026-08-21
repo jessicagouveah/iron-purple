@@ -21,9 +21,18 @@ Todos os exercícios incluem séries, repetições, intervalo sugerido, grupo mu
 - Calendário com os 12 meses de qualquer ano e navegação entre anos.
 - Seleção por data, semana, mês e ano, sem depender de julho ou de um ano específico.
 - Programa completo de segunda a sexta, sábado opcional e domingo de recuperação.
+- Demonstrações animadas, no estilo GIF, com as posições inicial e final de todos os exercícios.
+- Movimento mais lento nas demonstrações, para facilitar a observação da execução.
+- Validação completa dos 40 exercícios do plano: 37 movimentos únicos, todos com os dois quadros da execução.
+- Rodapé integrado ao final da página: não acompanha o scroll e não cobre exercícios ou botões.
+- Toque na animação para pausar ou continuar; abra os detalhes para visualizar o movimento em tamanho maior.
+- Ilustrações animadas próprias, disponíveis imediatamente e mesmo sem internet.
+- Fotos reais carregadas por dois endereços independentes e armazenadas offline após a primeira visualização.
 - Carga, repetições e descanso editáveis individualmente em cada série.
 - Marcação de séries, conclusão de exercícios e acompanhamento percentual do treino.
-- Cronômetro de treino com iniciar, pausar, continuar e finalizar.
+- Exercícios concluídos são recolhidos automaticamente e podem ser reabertos com um toque.
+- Cronômetro de treino com iniciar, pausar e continuar; o botão de finalizar só é liberado depois que o treino começa.
+- Navegação mais clara, com as abas “Treino do dia” e “Treinos”.
 - Cronômetro de descanso com opções de 45 segundos a 3 minutos.
 - Descanso automático opcional ao concluir uma série.
 - Inclusão, edição e remoção de exercícios no treino selecionado.
@@ -36,14 +45,24 @@ Todos os exercícios incluem séries, repetições, intervalo sugerido, grupo mu
 - Instalação como aplicativo no celular e funcionamento offline após o primeiro acesso.
 - Nenhum cadastro, servidor, mensalidade, biblioteca externa ou instalação de dependências.
 
+## Demonstrações dos exercícios
+
+Cada exercício inclui uma ilustração animada própria, carregada junto com o aplicativo e disponível sem depender de conexão externa. Quando houver internet, a ilustração é substituída pelas imagens reais da [Free Exercise DB](https://github.com/yuhonas/free-exercise-db), uma base pública distribuída sob [Unlicense](https://github.com/yuhonas/free-exercise-db/blob/main/LICENSE.md). O aplicativo alterna automaticamente entre as posições inicial e final para reproduzir o movimento continuamente, com efeito visual semelhante a um GIF.
+
+As fotos são solicitadas primeiro a uma CDN e, se ela falhar, diretamente ao repositório de origem. Depois de carregadas, ficam armazenadas no cache e podem continuar disponíveis offline. Caso ambos os endereços estejam indisponíveis, a ilustração do exercício continua animada normalmente. Exercícios personalizados também recebem uma animação quando o nome ou o grupo muscular corresponde a um movimento conhecido.
+
 ## Atualizar o GitHub Pages
+
+**Atualização mais simples:** substitua somente o arquivo `index.html` pelo arquivo atualizado deste pacote. Ele já inclui o código e o visual completos das animações, sem depender da atualização separada de `app.js` e `style.css`. Depois do commit, abra o endereço do aplicativo acrescentando `?v=20260821-usabilidade-1` para evitar a versão antiga guardada pelo navegador.
+
+Para atualizar também os arquivos de suporte e o funcionamento offline:
 
 1. Abra o repositório `iron-purple` no GitHub.
 2. Envie ou substitua os dez arquivos do pacote na raiz do repositório: `index.html`, `app.js`, `style.css`, `manifest.json`, `sw.js`, `icon.svg`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` e `README.md`.
 3. Confirme a atualização dos arquivos.
 4. Em **Settings > Pages**, mantenha **Deploy from a branch**, a branch `main` e a pasta `/(root)`.
 5. Aguarde a publicação e abra novamente o endereço do aplicativo.
-6. Se aparecer a versão antiga, feche o aplicativo e reabra. Se necessário, atualize a página uma segunda vez para que o novo cache seja ativado.
+6. O HTML identifica a nova versão dos arquivos automaticamente. Se aparecer a versão antiga, abra o endereço com `?v=20260821-usabilidade-1` no final ou atualize com `Ctrl + Shift + R` no computador.
 
 Ao atualizar o mesmo domínio, o aplicativo procura os dados da versão anterior e preserva o histórico disponível. Faça um backup antes de limpar dados do navegador ou trocar de aparelho.
 

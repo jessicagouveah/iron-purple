@@ -1,7 +1,12 @@
 "use strict";
 
-const CACHE_NAME = "iron-purple-v4-completo";
-const APP_ASSETS = ["./", "./index.html", "./style.css", "./app.js", "./manifest.json", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+const CACHE_NAME = "iron-purple-v8-usabilidade";
+const APP_VERSION = "2026-08-21-usabilidade-1";
+const APP_ASSETS = ["./", "./index.html", `./style.css?v=${APP_VERSION}`, `./app.js?v=${APP_VERSION}`, "./manifest.json", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+const EXERCISE_IMAGE_SOURCES = [
+  { origin: "https://cdn.jsdelivr.net", path: "/gh/yuhonas/free-exercise-db@main/exercises/" },
+  { origin: "https://raw.githubusercontent.com", path: "/yuhonas/free-exercise-db/main/exercises/" }
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_ASSETS)).then(() => self.skipWaiting()));
@@ -18,7 +23,24 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const requestURL = new URL(event.request.url);
-  if (requestURL.origin !== self.location.origin) return;
+  const isExerciseImage = EXERCISE_IMAGE_SOURCES.some((source) => requestURL.origin === source.origin && requestURL.pathname.startsWith(source.path));
+  if (requestURL.origin !== self.location.origin && !isExerciseImage) return;
+
+  if (isExerciseImage) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.ok || response.type === "opaque") {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
 
   if (event.request.mode === "navigate") {
     event.respondWith(

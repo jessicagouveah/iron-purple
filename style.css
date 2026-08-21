@@ -33,12 +33,14 @@ body {
 }
 button, input, select, textarea { font: inherit; }
 button { border: 0; cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .42; transform: none !important; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 3px; }
 a { color: inherit; }
 p, h1, h2, h3 { margin: 0; }
 .hidden { display: none !important; }
 .icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
-.app-shell { width: min(100%, 790px); margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 18px calc(114px + env(safe-area-inset-bottom)); }
+.app-shell { display: flex; width: min(100%, 790px); min-height: 100dvh; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 18px max(16px, env(safe-area-inset-bottom)); flex-direction: column; }
+#mainContent { position: relative; flex: 1; }
 .topbar, .top-actions, .brand-button, .section-heading, .hero-topline, .hero-bottom, .water-footer, .rest-header, .dialog-heading { display: flex; align-items: center; justify-content: space-between; }
 .topbar { min-height: 65px; margin-bottom: 22px; }
 .top-actions { gap: 9px; }
@@ -125,6 +127,9 @@ p, h1, h2, h3 { margin: 0; }
 .exercise-list { display: grid; gap: 12px; }
 .exercise-card { overflow: hidden; padding: 16px; border: 1px solid var(--line); border-radius: 21px; background: var(--surface); }
 .exercise-card.is-complete { border-color: rgba(104, 220, 172, .35); }
+.exercise-card.is-collapsed { padding-top: 13px; padding-bottom: 13px; background: linear-gradient(145deg, rgba(28, 44, 40, .82), rgba(22, 15, 30, .98)); }
+.exercise-card.is-collapsed .exercise-content { display: none; }
+.exercise-card.is-collapsed .exercise-title-wrap p { color: var(--green); }
 .exercise-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .exercise-number { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: var(--purple-bright); background: rgba(168, 113, 251, .13); font-size: 11px; font-weight: 800; }
 .exercise-card.is-complete .exercise-number { color: var(--green); background: rgba(104, 220, 172, .12); }
@@ -135,9 +140,44 @@ p, h1, h2, h3 { margin: 0; }
 .exercise-actions .icon-button { min-width: 33px; min-height: 33px; padding: 7px; border-color: transparent; background: transparent; }
 .exercise-actions .icon-button svg { width: 16px; height: 16px; }
 .exercise-actions .remove-exercise { color: var(--danger); }
+.exercise-actions .completed-toggle { color: var(--green); }
+.exercise-actions .completed-toggle svg { transition: transform .18s ease; }
+.exercise-card.is-complete:not(.is-collapsed) .completed-toggle svg { transform: rotate(90deg); }
 .exercise-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 13px 0 11px; }
 .exercise-tags span { padding: 5px 7px; border-radius: 7px; color: #d9ccea; background: var(--surface-soft); font-size: 10px; }
 .exercise-tags .muscle-tag { color: #f6b2d7; }
+.exercise-motion { position: relative; display: block; width: 100%; min-height: 185px; margin: 4px 0 13px; overflow: hidden; border: 1px solid rgba(166, 107, 255, .18); border-radius: 15px; background: #21132d; }
+.motion-illustration { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.motion-illustration .motion-person, .motion-illustration .motion-arm-front, .motion-illustration .motion-leg-front, .motion-illustration .motion-leg-back, .motion-illustration .motion-machine-load { transform-box: fill-box; transform-origin: center; }
+.motion-illustration .motion-person { animation: motion-body 3.2s ease-in-out infinite; }
+.motion-illustration .motion-arm-front { animation: motion-arm 3.2s ease-in-out infinite; }
+.motion-illustration .motion-leg-front { animation: motion-leg 3.2s ease-in-out infinite; }
+.motion-illustration .motion-leg-back { animation: motion-leg 3.2s ease-in-out infinite reverse; }
+.motion-illustration .motion-machine-load { animation: motion-load 3.2s ease-in-out infinite; }
+.motion-type-leg-press .motion-person, .motion-type-machine .motion-person { animation: motion-seated 3.2s ease-in-out infinite; }
+.motion-type-floor .motion-person { animation: motion-hip-raise 3.2s ease-in-out infinite; }
+.motion-type-plank .motion-person { animation: motion-plank 3.2s ease-in-out infinite; }
+.motion-type-walking .motion-leg-front, .motion-type-walking .motion-leg-back { animation-duration: 2.4s; }
+.motion-frame { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: #fff; opacity: 0; visibility: hidden; }
+.motion-frame-start.is-loaded { opacity: 1; visibility: visible; }
+.motion-frame-end.is-loaded { visibility: visible; }
+.has-motion-photos .motion-frame-start { animation: motion-frame-start 4s ease-in-out infinite; }
+.has-motion-photos .motion-frame-end { animation: motion-frame-end 4s ease-in-out infinite; }
+@keyframes motion-frame-start { 0%, 38% { opacity: 1; } 48%, 88% { opacity: 0; } 98%, 100% { opacity: 1; } }
+@keyframes motion-frame-end { 0%, 38% { opacity: 0; } 48%, 88% { opacity: 1; } 98%, 100% { opacity: 0; } }
+@keyframes motion-body { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(12px); } }
+@keyframes motion-arm { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(11deg); } }
+@keyframes motion-leg { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(9deg); } }
+@keyframes motion-load { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+@keyframes motion-seated { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+@keyframes motion-hip-raise { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-11px); } }
+@keyframes motion-plank { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+.exercise-motion.is-paused .motion-frame, .exercise-motion.is-paused .motion-illustration *, .has-motion-photos .motion-illustration * { animation-play-state: paused; }
+.exercise-motion.single-frame .motion-frame-start { opacity: 1; animation: none; }
+.motion-badge { position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 999px; color: #fff; background: rgba(33, 17, 52, .84); font-size: 8px; font-weight: 800; letter-spacing: .6px; }
+.motion-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 9px rgba(104, 220, 172, .7); }
+.motion-helper { position: absolute; right: 0; bottom: 0; left: 0; padding: 15px 10px 7px; color: #fff; background: linear-gradient(transparent, rgba(19, 11, 29, .74)); font-size: 9px; text-align: center; }
+.motion-details { min-height: 230px; margin: 0 0 15px; }
 .set-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .set-table th { padding: 8px 2px; color: var(--quiet); font-size: 9px; font-weight: 700; letter-spacing: .4px; text-align: center; text-transform: uppercase; }
 .set-table th:first-child, .set-table td:first-child { width: 32px; }
@@ -244,10 +284,10 @@ textarea { min-height: 82px; resize: vertical; }
 .backup-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .app-version { margin-top: 22px; color: var(--quiet); font-size: 10px; text-align: center; }
 
-.bottom-nav { position: fixed; z-index: 10; right: max(12px, calc((100vw - 765px) / 2)); bottom: max(12px, env(safe-area-inset-bottom)); left: max(12px, calc((100vw - 765px) / 2)); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 7px; border: 1px solid rgba(224, 206, 246, .11); border-radius: 21px; background: rgba(22, 15, 30, .94); box-shadow: 0 17px 48px rgba(0, 0, 0, .42); -webkit-backdrop-filter: blur(15px); backdrop-filter: blur(15px); }
+.bottom-nav { position: relative; z-index: 1; display: grid; width: 100%; margin: 28px 0 0; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 7px; border: 1px solid rgba(224, 206, 246, .14); border-radius: 21px; background: #160f1e; box-shadow: 0 17px 48px rgba(0, 0, 0, .34); isolation: isolate; }
 .nav-item { display: grid; min-height: 54px; place-items: center; gap: 3px; padding: 7px 3px; border-radius: 14px; color: var(--quiet); background: transparent; }
 .nav-item svg { width: 20px; height: 20px; }
-.nav-item span { font-size: 9px; font-weight: 650; }
+.nav-item span { font-size: 9px; font-weight: 650; white-space: nowrap; }
 .nav-item.is-active { color: #fff; background: linear-gradient(145deg, rgba(154, 99, 240, .31), rgba(118, 66, 205, .19)); }
 .nav-item.is-active svg { color: var(--purple-bright); }
 
@@ -268,7 +308,7 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
 .detail-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
 .detail-metrics > span { display: grid; gap: 4px; padding: 10px 7px; border-radius: 10px; color: var(--muted); background: var(--surface-soft); font-size: 9px; }
 .detail-metrics strong { color: var(--text); font-size: 12px; }
-.toast { position: fixed; z-index: 30; right: 18px; bottom: calc(94px + env(safe-area-inset-bottom)); left: 18px; width: fit-content; max-width: min(calc(100% - 36px), 510px); margin: 0 auto; padding: 12px 15px; border: 1px solid var(--line-strong); border-radius: 13px; background: #241933; box-shadow: var(--shadow); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .18s ease, transform .18s ease; }
+.toast { position: fixed; z-index: 30; right: 18px; bottom: max(18px, env(safe-area-inset-bottom)); left: 18px; width: fit-content; max-width: min(calc(100% - 36px), 510px); margin: 0 auto; padding: 12px 15px; border: 1px solid var(--line-strong); border-radius: 13px; background: #241933; box-shadow: var(--shadow); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .18s ease, transform .18s ease; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 390px) {
@@ -278,6 +318,8 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
   .workout-control { align-items: flex-start; flex-direction: column; }
   .workout-control-actions { width: 100%; justify-content: flex-start; }
   .exercise-card { padding: 12px; }
+  .exercise-motion { min-height: 165px; }
+  .motion-details { min-height: 205px; }
   .exercise-title-wrap h3 { font-size: 13px; }
   .exercise-actions .icon-button { min-width: 29px; min-height: 29px; padding: 5px; }
   .calendar-selects { grid-template-columns: 1fr 72px; }
@@ -289,6 +331,8 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
   .hero-card { min-height: 247px; padding: 26px; }
   .week-card, .calendar-card, .workout-control, .rest-card, .water-card, .chart-card, .records-card, .history-card, .guidance-card, .profile-form, .wellness-card, .backup-card { padding: 22px; }
   .exercise-card { padding: 20px; }
+  .exercise-motion { min-height: 225px; }
+  .motion-details { min-height: 275px; }
   .set-table th, .set-table input { font-size: 12px; }
   .set-table td { height: 52px; }
   .plan-days { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -297,4 +341,6 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .motion-frame-start { opacity: 1 !important; animation: none !important; }
+  .motion-frame-end { display: none; }
 }
