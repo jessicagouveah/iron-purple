@@ -1,8 +1,8 @@
 "use strict";
 
-const CACHE_NAME = "iron-purple-v8-usabilidade";
-const APP_VERSION = "2026-08-21-usabilidade-1";
-const APP_ASSETS = ["./", "./index.html", `./style.css?v=${APP_VERSION}`, `./app.js?v=${APP_VERSION}`, "./manifest.json", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+const CACHE_NAME = "iron-purple-v9-coach";
+const APP_VERSION = "2026-08-21-coach-1";
+const APP_ASSETS = ["./", "./index.html", "./professor/index.html", `./style.css?v=${APP_VERSION}`, `./app.js?v=${APP_VERSION}`, "./manifest.json", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 const EXERCISE_IMAGE_SOURCES = [
   { origin: "https://cdn.jsdelivr.net", path: "/gh/yuhonas/free-exercise-db@main/exercises/" },
   { origin: "https://raw.githubusercontent.com", path: "/yuhonas/free-exercise-db/main/exercises/" }
@@ -43,14 +43,16 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (event.request.mode === "navigate") {
+    const professorPath = new URL("./professor/", self.location.href).pathname;
+    const navigationCacheKey = requestURL.pathname.startsWith(professorPath) ? "./professor/index.html" : "./index.html";
     event.respondWith(
       fetch(event.request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          caches.open(CACHE_NAME).then((cache) => cache.put(navigationCacheKey, copy));
           return response;
         })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match(navigationCacheKey)))
     );
     return;
   }

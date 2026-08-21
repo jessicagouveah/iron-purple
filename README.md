@@ -45,6 +45,12 @@ Todos os exercícios incluem séries, repetições, intervalo sugerido, grupo mu
 - Instalação como aplicativo no celular e funcionamento offline após o primeiro acesso.
 - Nenhum cadastro, servidor, mensalidade, biblioteca externa ou instalação de dependências.
 
+## IRON Coach — painel do professor
+
+O pacote também inclui a pasta `professor`, com um protótipo navegável do painel profissional. Depois da publicação, ele pode ser aberto em `https://jessicagouveah.github.io/iron-purple/professor/`.
+
+O protótipo inclui visão geral, alunos, avaliações recebidas, confirmação de maioridade, fotos opcionais, biblioteca de exercícios, montagem de treinos e indicadores de evolução. Os dados exibidos são demonstrativos. Fotos selecionadas na prévia não são enviadas nem armazenadas; o uso com dados reais dependerá da conexão segura com login, banco de dados e armazenamento privado.
+
 ## Demonstrações dos exercícios
 
 Cada exercício inclui uma ilustração animada própria, carregada junto com o aplicativo e disponível sem depender de conexão externa. Quando houver internet, a ilustração é substituída pelas imagens reais da [Free Exercise DB](https://github.com/yuhonas/free-exercise-db), uma base pública distribuída sob [Unlicense](https://github.com/yuhonas/free-exercise-db/blob/main/LICENSE.md). O aplicativo alterna automaticamente entre as posições inicial e final para reproduzir o movimento continuamente, com efeito visual semelhante a um GIF.
@@ -53,16 +59,16 @@ As fotos são solicitadas primeiro a uma CDN e, se ela falhar, diretamente ao re
 
 ## Atualizar o GitHub Pages
 
-**Atualização mais simples:** substitua somente o arquivo `index.html` pelo arquivo atualizado deste pacote. Ele já inclui o código e o visual completos das animações, sem depender da atualização separada de `app.js` e `style.css`. Depois do commit, abra o endereço do aplicativo acrescentando `?v=20260821-usabilidade-1` para evitar a versão antiga guardada pelo navegador.
+**Nesta atualização:** envie todos os arquivos do pacote, incluindo a pasta `professor`. O `index.html` continua incluindo o código e o visual completos do aplicativo do aluno. Depois do commit, abra o endereço do aplicativo acrescentando `?v=20260821-coach-1` para evitar a versão antiga guardada pelo navegador.
 
 Para atualizar também os arquivos de suporte e o funcionamento offline:
 
 1. Abra o repositório `iron-purple` no GitHub.
-2. Envie ou substitua os dez arquivos do pacote na raiz do repositório: `index.html`, `app.js`, `style.css`, `manifest.json`, `sw.js`, `icon.svg`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` e `README.md`.
+2. Envie ou substitua os dez arquivos do pacote na raiz do repositório e envie também a pasta `professor`, contendo o arquivo `index.html` do painel.
 3. Confirme a atualização dos arquivos.
 4. Em **Settings > Pages**, mantenha **Deploy from a branch**, a branch `main` e a pasta `/(root)`.
 5. Aguarde a publicação e abra novamente o endereço do aplicativo.
-6. O HTML identifica a nova versão dos arquivos automaticamente. Se aparecer a versão antiga, abra o endereço com `?v=20260821-usabilidade-1` no final ou atualize com `Ctrl + Shift + R` no computador.
+6. O HTML identifica a nova versão dos arquivos automaticamente. Se aparecer a versão antiga, abra o endereço com `?v=20260821-coach-1` no final ou atualize com `Ctrl + Shift + R` no computador.
 
 Ao atualizar o mesmo domínio, o aplicativo procura os dados da versão anterior e preserva o histórico disponível. Faça um backup antes de limpar dados do navegador ou trocar de aparelho.
 

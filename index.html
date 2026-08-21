@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-  <style data-iron-bundle="usabilidade-1">
+  <style data-iron-bundle="coach-1">
 :root {
   color-scheme: dark;
   --background: #0d0815;
@@ -459,7 +459,7 @@ dialog::backdrop { background: rgba(5, 2, 10, .76); -webkit-backdrop-filter: blu
   <dialog id="exerciseDetailsDialog"><div class="dialog-card details-dialog"><div class="dialog-heading"><div><p id="detailsMuscle" class="eyebrow"></p><h2 id="detailsName"></h2></div><button type="button" class="icon-button dialog-close" data-close-dialog="exerciseDetailsDialog" aria-label="Fechar"><svg><use href="#i-close"/></svg></button></div><div id="detailsContent"></div><a id="detailsVideoLink" class="button button-primary full-width" target="_blank" rel="noopener noreferrer">Ver execução em vídeo</a></div></dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script data-iron-bundle="usabilidade-1">
+  <script data-iron-bundle="coach-1">
 "use strict";
 
 const STORAGE_KEY = "ironPurpleState";
@@ -467,7 +467,7 @@ const SCHEMA_VERSION = 4;
 const WEEKDAYS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 const SHORT_DAYS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
 const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-const APP_VERSION = "2026-08-21-usabilidade-1";
+const APP_VERSION = "2026-08-21-coach-1";
 const EXERCISE_IMAGE_BASE = "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises";
 const EXERCISE_IMAGE_FALLBACK = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
 const EXERCISE_MOTION_IDS = Object.freeze({
